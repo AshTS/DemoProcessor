@@ -44,8 +44,6 @@ void Processor::execute_instruction()
             if (format == 1 && offset)
             {
                 address = (unsigned int)address + RAM[program_counter + 2] * 256 + RAM[program_counter + 3];
-                printf("ADDR: %04X\n", address);
-
             }
 
             if (size == 0)
@@ -325,8 +323,7 @@ void Processor::execute_instruction()
 
             unsigned char link = 0;
             unsigned char flag = 0;
-            unsigned char addr = 0;
-
+            unsigned short addr = 0;
             if (use_link)
             {
                 link = reg0;

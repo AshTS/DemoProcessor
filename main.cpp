@@ -42,7 +42,7 @@ int main(int argc, char** argv)
     processor.display_state();
     processor.dump_ram_segment(0x0000, 0x0020);
 
-    for (int i = 0; i < 4500; i++)
+    while (processor.RAM[0xFFFF] == 0)
     {
         //printf("\n\n");
         if (processor.RAM[0x7FFF] != 0)

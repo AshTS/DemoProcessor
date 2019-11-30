@@ -116,7 +116,7 @@ def get_compiled(args):
         r1 = interpret_arg(args[1]) if len(args) > 1 else 0
         r2 = interpret_arg(args[2]) if len(args) > 2 else 0
 
-        last_bytes = [f * 0x80 + l * 0x40 + i * 0x20 + r1]
+        last_bytes = [f * 0x80 + l * 0x40 + i * 0x20 + r1 % 256]
 
         if i == 1:
             imm = interpret_arg(args[-1])
@@ -153,18 +153,25 @@ def assemble(data, start=0):
     lines = [item.strip() for item in data.split("\n") if item.strip() != ""]
 
     for line in lines:
-        if not line.startswith("#"):
+        if line.startswith("."):
+            if line.split(" ")[0][1:] == "SEG":
+                place = int(line.split(" ")[1], 0)
+
+                while len(result) < place:
+                    result.append(0)
+
+        elif not line.startswith("#"):
             if line.endswith(":"):
                 labels[line.split(":")[0]] = len(result)
             else:
                 result += get_compiled(line.split(" "))
 
-        if add_replace != "":
-            replace[len(result) - 2] = add_replace
-            add_replace = "" 
+            if add_replace != "":
+                replace[len(result) - 2] = add_replace
+                add_replace = "" 
 
     for k in replace:
         result[k] = (labels[replace[k]] & 0xFF00) >> 8
         result[k + 1] = labels[replace[k]] & 0xFF
-
+    
     return result
