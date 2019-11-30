@@ -43,7 +43,9 @@ void Processor::execute_instruction()
 
             if (format == 1 && offset)
             {
-                address += RAM[program_counter + 2] * 256 + RAM[program_counter + 3];
+                address = (unsigned int)address + RAM[program_counter + 2] * 256 + RAM[program_counter + 3];
+                printf("ADDR: %04X\n", address);
+
             }
 
             if (size == 0)
@@ -153,11 +155,22 @@ void Processor::execute_instruction()
 
             bool left_right = (RAM[program_counter + 1] & 0b10000000) >> 7;
             bool logical_arithmatic = (RAM[program_counter + 1] & 0b01000000) >> 6;
+            bool use_immediate = (RAM[program_counter + 1] & 0b00100000) >> 5;
 
             unsigned short result = 0;
 
             signed short arg0 = (signed short)read_register(source);
             signed short arg1 = 0;
+
+            if (use_immediate)
+            {
+                arg1 = immediate;
+            }
+            else
+            {
+                arg1 = read_register(source_2);
+            }
+            
 
             if (!logical_arithmatic)
             {
@@ -251,7 +264,7 @@ void Processor::execute_instruction()
             bool less = (RAM[program_counter + 1] & 0b01000000) >> 6;
             bool equal = (RAM[program_counter + 1] & 0b00100000) >> 5;
             bool use_immediate = (RAM[program_counter + 1] & 0b00010000) >> 4;
-            bool use_unsigned = (format == 6);
+            bool use_unsigned = (type == 6);
 
             unsigned char source_0 = (RAM[program_counter + 1] & 0x0F) >> 0;
             unsigned char source_1 = (RAM[program_counter + 2] & 0xF0) >> 4;
@@ -286,15 +299,13 @@ void Processor::execute_instruction()
 
             if (equal && val0 == val1)
             {
-                result |= 0b010;
+                result |= 0b001;
             }
 
             if (invert)
             {
-                result ^= 0b011;
+                result ^= 0b001;
             }
-
-            printf("V0: %04X, V1: %04X, Result: %04X\n", val0, val1, result);
 
             write_register(dest, result);
         }
