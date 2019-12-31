@@ -407,7 +407,7 @@ void Processor::dump_ram_segment(unsigned short start, unsigned short length)
         {
             char c = RAM[a + i];
 
-            if (a + i == program_counter)
+            if (a + i == program_counter || a + i == registers[2])
             {
                 printf(HIGHLIGHT);
             }

@@ -4,7 +4,7 @@ replace = {}
 add_replace = ""
 
 def build_command_byte(fmt, cmd_type, dest):
-    return [fmt * 0x80 + cmd_type * 0x10 + dest]
+    return [fmt * 0x80 + (cmd_type % 8) * 0x10 + dest % 16]
 
 def interpret_arg(arg):
     global add_replace
@@ -109,14 +109,14 @@ def get_compiled(args):
         return build_command_byte(1, fmt, interpret_arg(args[0])) + last_bytes
 
     if op.startswith("J"):
-        f = "F" in op
-        l = "L" in op
+        f = 1 if "F" in op else 0
+        l = 1 if "L" in op else 0
         i = 0 if args[-1].startswith("R") else 1
 
         r1 = interpret_arg(args[1]) if len(args) > 1 else 0
         r2 = interpret_arg(args[2]) if len(args) > 2 else 0
 
-        last_bytes = [f * 0x80 + l * 0x40 + i * 0x20 + r1 % 256]
+        last_bytes = [f * 0x80 + l * 0x40 + i * 0x20 + r1 % 16]
 
         if i == 1:
             imm = interpret_arg(args[-1])
@@ -125,7 +125,9 @@ def get_compiled(args):
             last_bytes.append(r2 * 16)
             last_bytes.append(0)
 
-        return build_command_byte(1, 5, interpret_arg(args[0])) + last_bytes
+        result = build_command_byte(1, 5, interpret_arg(args[0]) % 16) + last_bytes
+
+        return result
 
     if op.startswith("S") or op.startswith("R"):
         o = "O" in op
@@ -141,6 +143,8 @@ def get_compiled(args):
             last_bytes += [(imm & 0xFF00) >> 8, imm&0xFF]
 
         return build_command_byte(i, 0, interpret_arg(args[0])) + last_bytes
+
+    print(op)
 
 def assemble(data, start=0):
     global labels
@@ -160,6 +164,15 @@ def assemble(data, start=0):
                 while len(result) < place:
                     result.append(0)
 
+        elif line.startswith("~"):
+            data = "".join(line.split("~")[1].split(" "))
+            data_iter = iter(data)
+
+            for v in data_iter:
+                v += next(data_iter)
+                result.append(int(v, 16))
+
+
         elif not line.startswith("#"):
             if line.endswith(":"):
                 labels[line.split(":")[0]] = len(result)
@@ -169,9 +182,11 @@ def assemble(data, start=0):
             if add_replace != "":
                 replace[len(result) - 2] = add_replace
                 add_replace = "" 
-
+    
     for k in replace:
         result[k] = (labels[replace[k]] & 0xFF00) >> 8
         result[k + 1] = labels[replace[k]] & 0xFF
     
+    print(result)
+
     return result

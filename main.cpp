@@ -57,11 +57,19 @@ int main(int argc, char** argv)
 
         processor.execute_instruction();
         
+        /*
+        processor.display_state();
+        processor.dump_ram_segment(processor.program_counter, 0x0040);
+        processor.dump_ram_segment(0xFE0, 0x0040);
+        processor.dump_ram_segment(0x7000, 0x10);
+        processor.dump_ram_segment(0x7FFF, 0x20);
 
-        //processor.display_state();
-        //processor.dump_ram_segment(0x0000, 0x0020);
-        //processor.dump_ram_segment(0x7FFF, 0x0020);
+        char c;
+        std::cin >> c;*/
     }
+
+    processor.dump_ram_segment(0x0000, 0x0100);
+    processor.dump_ram_segment(0x7FFF, 0x0200);
 
     return 0;
 }
