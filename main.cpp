@@ -15,6 +15,16 @@ int main(int argc, char** argv)
         return -1;
     }
 
+    bool do_debug = false;
+
+    for (int i = 2; i < argc; i++)
+    {
+        if (std::string(argv[i]) == std::string("-D"))
+        {
+            do_debug = true;
+        }
+    }
+
     Processor processor;
 
     std::ifstream in(argv[1], std::ios::binary);
@@ -57,19 +67,15 @@ int main(int argc, char** argv)
 
         processor.execute_instruction();
         
-        /*
-        processor.display_state();
-        processor.dump_ram_segment(processor.program_counter, 0x0040);
-        processor.dump_ram_segment(0xFE0, 0x0040);
-        processor.dump_ram_segment(0x7000, 0x10);
-        processor.dump_ram_segment(0x7FFF, 0x20);
+        if (do_debug)
+        {
+            processor.display_state();
+            processor.dump_ram_segment(processor.program_counter, 0x0040);
 
-        char c;
-        std::cin >> c;*/
+            char c;
+            std::cin >> c;
+        }
     }
-
-    processor.dump_ram_segment(0x0000, 0x0100);
-    processor.dump_ram_segment(0x7FFF, 0x0200);
 
     return 0;
 }
