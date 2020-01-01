@@ -186,7 +186,5 @@ def assemble(data, start=0):
     for k in replace:
         result[k] = (labels[replace[k]] & 0xFF00) >> 8
         result[k + 1] = labels[replace[k]] & 0xFF
-    
-    print(result)
 
     return result
